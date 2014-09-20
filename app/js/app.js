@@ -10,7 +10,7 @@ var spinnerModule = (function() {
         corners: 1, // Corner roundness (0..1)
         rotate: 0, // The rotation offset
         direction: 1, // 1: clockwise, -1: counterclockwise
-        color: '#666', // #rgb or #rrggbb or array of colors
+        color: '#fff', // #rgb or #rrggbb or array of colors
         speed: 1, // Rounds per second
         trail: 60, // Afterglow percentage
         shadow: false, // Whether to render a shadow
@@ -89,7 +89,7 @@ var googleMap = (function() {
             infoWindow = new google.maps.InfoWindow(),
             defaultLocation = new google.maps.LatLng(52.486243, -1.890401),
             pointarray,
-            spotRadius = 30,
+            spotRadius = 50,
             opacity = 0.8,
             IsDissipating = true,
             heatmapNegative,
@@ -298,67 +298,73 @@ var googleMap = (function() {
     spinnerModule.showSpinner('spinner');
 
     // var url = 'http://api.openweathermap.org/data/2.1/find/station?lat=55&lon=37&cnt=10';
-    // var url = 'http://sentimentanalyser.azurewebsites.net/q/everything';
-    var url = 'http://sentimentanalyser.azurewebsites.net/test';
 
     var mainForm = $("#searchform");
     mainForm.submit(function(e) {
         e.preventDefault();
         var location = $("#location", mainForm).val();
+        var subject = $("#subject", mainForm).val();
         console.log("geocoding " + location);
 
         if (location) {
             geocoder.geocode(location, function(position) {
                 console.log(position);
+                search(subject, position);
             });
         }
     });
 
-    dataModule.getData(url, function(data) {
-        spinnerModule.hideSpinner();
+    var search = function(searchTerm, location) {
 
-        var append = '<span>General mood for: ' + data.name + ' is ' + data.mood + '</span>';
+        // var url = 'http://sentimentanalyser.azurewebsites.net/test';
+        var url = 'http://sentimentanalyser.azurewebsites.net/search/' + searchTerm + '/' + location.lat + '/' + location.lng;
 
-        $('#data').html(append);
+        console.log(url);
 
-        console.log(data);
-        var positive = [],
-            negative = [];
+        dataModule.getData(url, function(data) {
 
-        for (var i = data.points.length - 1; i >= 0; i--) {
+            console.log(data);
 
-            if (data.points[i].mood > 0) {
-                positive.push({
-                    location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
-                    weight: Math.abs(data.points[i].mood) + 100
-                });
-            } else {
-                negative.push({
-                    location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
-                    weight: Math.abs(data.points[i].mood) + 100
-                });
+            spinnerModule.hideSpinner();
+
+            // var append = '<span>General mood for: ' + data.name + ' is ' + data.mood + '</span>';
+
+            // $('#data').html(append);
+
+            var positive = [],
+                negative = [];
+
+            for (var i = data.points.length - 1; i >= 0; i--) {
+
+                if (data.points[i].mood > 0) {
+                    positive.push({
+                        location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
+                        weight: Math.abs(data.points[i].mood) + 100
+                    });
+                } else {
+                    negative.push({
+                        location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
+                        weight: Math.abs(data.points[i].mood) + 100
+                    });
+                };
             };
-        };
 
-        googleMap.createPositiveHeatMap(positive, map);
-        googleMap.createNegativeHeatMap(negative, map);
+            googleMap.createPositiveHeatMap(positive, map);
+            googleMap.createNegativeHeatMap(negative, map);
 
+            // for (var i = 0; i < data.points.length; i++) {
 
+            //     // console.log(googleMap.getCircle(data.points[i].mood));
 
-        // for (var i = 0; i < data.points.length; i++) {
+            //     var latLng = new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]);
 
-        //     // console.log(googleMap.getCircle(data.points[i].mood));
-
-        //     var latLng = new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]);
-
-        //     var marker = new google.maps.Marker({
-        //         position: latLng,
-        //         map: map,
-        //         icon: googleMap.getCircle(data.points[i].mood)
-        //     });
-        // }
-
-
-    });
+            //     var marker = new google.maps.Marker({
+            //         position: latLng,
+            //         map: map,
+            //         icon: googleMap.getCircle(data.points[i].mood)
+            //     });
+            // }
+        });
+    }
 
 })();
