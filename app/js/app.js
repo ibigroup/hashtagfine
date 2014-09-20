@@ -57,21 +57,21 @@ var dataModule = (function() {
 
 })();
 
-var geocoder = (function(){
-    
-    var geocode = function(location, callback) {
-            var requestUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" + location + "&sensor=false";
-            var request = $.ajax({
-                dataType: "json",
-                url: requestUrl
-            });
+var geocoder = (function() {
 
-            request.done(function(data) {
-                if (data.results && data.results.length > 0) {
-                    var location = data.results[0].geometry.location;
-                    callback(location);
-                }
-            });
+    var geocode = function(location, callback) {
+        var requestUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" + location + "&sensor=false";
+        var request = $.ajax({
+            dataType: "json",
+            url: requestUrl
+        });
+
+        request.done(function(data) {
+            if (data.results && data.results.length > 0) {
+                var location = data.results[0].geometry.location;
+                callback(location);
+            }
+        });
     };
 
     return {
@@ -89,45 +89,12 @@ var googleMap = (function() {
             infoWindow = new google.maps.InfoWindow(),
             defaultLocation = new google.maps.LatLng(52.486243, -1.890401),
             pointarray,
+            spotRadius = 30,
+            opacity = 0.8,
+            IsDissipating = true,
             heatmapNegative,
             heatmapPositive,
             moodsData = [];
-
-        var getCircle = function(mood, circle) {
-
-            var mainColor = '#bb0';
-
-            var circle = {
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: 'yellow',
-                fillOpacity: 0.8,
-                scale: 10,
-                strokeColor: 'gold',
-                strokeWeight: 1
-            };
-
-            if (mood === -2) {
-                circle.fillColor = '#BB6D00';
-                circle.strokeColor = '#BB6D00';
-            } else if (mood === -1) {
-                circle.fillColor = '#ABBB00';
-                circle.strokeColor = '#ABBB00';
-            } else if (mood === -0) {
-                circle.fillColor = '#51BB00';
-                circle.strokeColor = '#51BB00';
-            } else if (mood === 1) {
-                circle.fillColor = '#00BB70';
-                circle.strokeColor = '#00BB70';
-            } else if (mood === 2) {
-                circle.fillColor = '#00A2BB';
-                circle.strokeColor = '#00A2BB';
-            } else if (mood === 3) {
-                circle.fillColor = '#05CAE8';
-                circle.strokeColor = '#05CAE8';
-            }
-
-            return circle;
-        }
 
         var createNegativeHeatMap = function(moodsData, map) {
 
@@ -140,8 +107,9 @@ var googleMap = (function() {
 
             heatmapNegative = new google.maps.visualization.HeatmapLayer({
                 data: pointArray,
-                radius: 20,
-                // opacity: 1
+                radius: spotRadius,
+                dissipating: IsDissipating,
+                opacity: opacity
             });
 
             heatmapNegative.set('gradient', heatmapNegative.get('gradient') ? null : gradient);
@@ -159,8 +127,9 @@ var googleMap = (function() {
 
             heatmapPositive = new google.maps.visualization.HeatmapLayer({
                 data: pointArray,
-                radius: 15,
-                // opacity: 1
+                radius: spotRadius,
+                dissipating: IsDissipating,
+                opacity: opacity
             });
 
             heatmapPositive.set('gradient', heatmapPositive.get('gradient') ? null : gradient);
@@ -178,24 +147,111 @@ var googleMap = (function() {
             map = buildMap(containerId, options);
 
             var styles = [{
-                stylers: [{
-                    hue: "#00ffe6"
+                "featureType": "water",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#000000"
                 }, {
-                    saturation: -20
+                    "lightness": 17
                 }]
             }, {
-                featureType: "road",
-                elementType: "geometry",
-                stylers: [{
-                    lightness: 100
+                "featureType": "landscape",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#000000"
                 }, {
-                    visibility: "simplified"
+                    "lightness": 20
                 }]
             }, {
-                featureType: "road",
-                elementType: "labels",
-                stylers: [{
-                    visibility: "off"
+                "featureType": "road.highway",
+                "elementType": "geometry.fill",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 17
+                }]
+            }, {
+                "featureType": "road.highway",
+                "elementType": "geometry.stroke",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 29
+                }, {
+                    "weight": 0.2
+                }]
+            }, {
+                "featureType": "road.arterial",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 18
+                }]
+            }, {
+                "featureType": "road.local",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 16
+                }]
+            }, {
+                "featureType": "poi",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 21
+                }]
+            }, {
+                "elementType": "labels.text.stroke",
+                "stylers": [{
+                    "visibility": "on"
+                }, {
+                    "color": "#000000"
+                }, {
+                    "lightness": 16
+                }]
+            }, {
+                "elementType": "labels.text.fill",
+                "stylers": [{
+                    "saturation": 36
+                }, {
+                    "color": "#000000"
+                }, {
+                    "lightness": 40
+                }]
+            }, {
+                "elementType": "labels.icon",
+                "stylers": [{
+                    "visibility": "off"
+                }]
+            }, {
+                "featureType": "transit",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 19
+                }]
+            }, {
+                "featureType": "administrative",
+                "elementType": "geometry.fill",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 20
+                }]
+            }, {
+                "featureType": "administrative",
+                "elementType": "geometry.stroke",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 17
+                }, {
+                    "weight": 1.2
                 }]
             }];
 
@@ -231,8 +287,7 @@ var googleMap = (function() {
             create: createGoogleMap,
             move: move,
             createNegativeHeatMap: createNegativeHeatMap,
-            createPositiveHeatMap: createPositiveHeatMap,
-            getCircle: getCircle
+            createPositiveHeatMap: createPositiveHeatMap
         };
     }
 }());
@@ -248,15 +303,15 @@ var googleMap = (function() {
 
     var mainForm = $("#searchform");
     mainForm.submit(function(e) {
-       e.preventDefault();
-       var location = $("#location", mainForm).val();
-       console.log("geocoding " + location);
+        e.preventDefault();
+        var location = $("#location", mainForm).val();
+        console.log("geocoding " + location);
 
-       if (location) {
+        if (location) {
             geocoder.geocode(location, function(position) {
                 console.log(position);
-            });  
-       }
+            });
+        }
     });
 
     dataModule.getData(url, function(data) {
@@ -275,12 +330,12 @@ var googleMap = (function() {
             if (data.points[i].mood > 0) {
                 positive.push({
                     location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
-                    weight: data.points[i].mood + 100
+                    weight: Math.abs(data.points[i].mood) + 100
                 });
             } else {
                 negative.push({
                     location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
-                    weight: data.points[i].mood + 1000
+                    weight: Math.abs(data.points[i].mood) + 100
                 });
             };
         };
