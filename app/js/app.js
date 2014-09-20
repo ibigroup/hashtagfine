@@ -69,29 +69,73 @@ var googleMap = (function() {
             heatmap,
             moodsData = [];
 
+        var getCircle = function(mood, circle) {
+
+            var mainColor = '#bb0';
+
+            var circle = {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: 'yellow',
+                fillOpacity: 0.8,
+                scale: 10,
+                strokeColor: 'gold',
+                strokeWeight: 1
+            };
+
+            if (mood === -2) {
+                circle.fillColor = '#BB6D00';
+                circle.strokeColor = '#BB6D00';
+            } else if (mood === -1) {
+                circle.fillColor = '#ABBB00';
+                circle.strokeColor = '#ABBB00';
+            } else if (mood === -0) {
+                circle.fillColor = '#51BB00';
+                circle.strokeColor = '#51BB00';
+            } else if (mood === 1) {
+                circle.fillColor = '#00BB70';
+                circle.strokeColor = '#00BB70';
+            } else if (mood === 2) {
+                circle.fillColor = '#00A2BB';
+                circle.strokeColor = '#00A2BB';
+            } else if (mood === 3) {
+                circle.fillColor = '#05CAE8';
+                circle.strokeColor = '#05CAE8';
+            }
+
+            return circle;
+        }
+
         var createHeatMap = function(moodsData, map) {
+
+            // var gradient = [
+            //     'rgba(0, 255, 255, 0)',
+            //     'rgba(0, 255, 255, 1)',
+            //     'rgba(0, 191, 255, 1)',
+            //     'rgba(0, 127, 255, 1)',
+            //     'rgba(0, 63, 255, 1)',
+            //     'rgba(0, 0, 255, 1)',
+            //     'rgba(0, 0, 223, 1)',
+            //     'rgba(0, 0, 191, 1)',
+            //     'rgba(0, 0, 159, 1)',
+            //     'rgba(0, 0, 127, 1)',
+            //     'rgba(63, 0, 91, 1)',
+            //     'rgba(127, 0, 63, 1)',
+            //     'rgba(191, 0, 31, 1)',
+            //     'rgba(255, 0, 0, 1)'
+            // ]
 
             var gradient = [
                 'rgba(0, 255, 255, 0)',
-                'rgba(0, 255, 255, 1)',
-                'rgba(0, 191, 255, 1)',
-                'rgba(0, 127, 255, 1)',
-                'rgba(0, 63, 255, 1)',
-                'rgba(0, 0, 255, 1)',
-                'rgba(0, 0, 223, 1)',
-                'rgba(0, 0, 191, 1)',
-                'rgba(0, 0, 159, 1)',
-                'rgba(0, 0, 127, 1)',
-                'rgba(63, 0, 91, 1)',
-                'rgba(127, 0, 63, 1)',
-                'rgba(191, 0, 31, 1)',
-                'rgba(255, 0, 0, 1)'
-            ]
+                '#ff0000',
+                '#00ff00'
+            ];
 
             var pointArray = new google.maps.MVCArray(moodsData);
 
             heatmap = new google.maps.visualization.HeatmapLayer({
-                data: pointArray
+                data: pointArray,
+                radius: 15
+                // maxIntensity: 6
             });
 
             heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
@@ -163,6 +207,7 @@ var googleMap = (function() {
             create: createGoogleMap,
             move: move,
             heatmap: createHeatMap,
+            getCircle: getCircle
         };
     }
 }());
@@ -179,7 +224,7 @@ var googleMap = (function() {
     dataModule.getData(url, function(data) {
         spinnerModule.hideSpinner();
 
-        var append = '<span>General mood : ' + data.mood + ' </span>';
+        var append = '<span>General mood for: ' + data.name + ' is ' + data.mood + '</span>';
 
         $('#data').html(append);
 
@@ -194,6 +239,23 @@ var googleMap = (function() {
         };
 
         googleMap.heatmap(points, map);
+
+
+
+        // for (var i = 0; i < data.points.length; i++) {
+
+        //     // console.log(googleMap.getCircle(data.points[i].mood));
+
+        //     var latLng = new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]);
+
+        //     var marker = new google.maps.Marker({
+        //         position: latLng,
+        //         map: map,
+        //         icon: googleMap.getCircle(data.points[i].mood)
+        //     });
+        // }
+
+
     });
 
 })();
