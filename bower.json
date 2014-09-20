@@ -1,0 +1,13 @@
+{
+  "name": "hackathon-app",
+  "version": "0.0.1",
+  "dependencies": {
+    "normalize-css": "*",
+    "bootstrap": "*",
+    "modernizr": "*",
+    "jquery": "*",
+    "spinjs": "*",
+    "font-awesome": "*"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,17 @@
+// /* FONT FACE */
+// @mixin font-face( $name, $filename, $svg_id, $style:normal, $weight:normal ) {
+// 	@font-face {
+// 		font-family: "#{$name}";
+// 		font-style: $style;
+// 		font-weight: $weight;
+// 		src: font-url( "#{$filename}.eot" );
+// 		src: font-url( "#{$filename}.eot?#iefix" ) format( "embedded-opentype" ),
+// 			 font-url( "#{$filename}.woff" ) format( "woff" ),
+// 			 font-url( "#{$filename}.ttf" ) format( "truetype" ),
+// 			 font-url( "#{$filename}.svg##{$svg_id}" ) format( "svg" );
+// 	}
+// }
+
+// .pt-sans {
+// 	@include font-face( PT Sans, fonts/PT_Sans-Web-Regular, f39585f1b656e5f9297b79e526233403, normal, normal )
+// }

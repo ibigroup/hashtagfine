@@ -1,0 +1,47 @@
+//LAYOUT
+
+#media-query-indicator:after {
+    content: "mobile";
+    background: white;
+}
+
+.wrapper {
+    width: 95%;
+    margin: 0 auto;
+}
+
+#main {
+  position: relative;
+  padding: 3% 0;
+}
+
+nav {
+    float: right;
+}
+
+body > nav {
+    padding: 10px 0;
+}
+
+nav a {
+    display: none;
+}
+
+.single nav a {
+    display: inline;
+}
+
+body > nav ul {
+    text-align: left;
+    margin: 0;
+}
+
+body > nav li {
+    margin-right: 20px;
+    display: inline;
+}
+
+article[id*=comment-] {
+    margin: 15px 0;
+    padding: 10px;
+}
