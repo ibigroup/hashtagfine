@@ -96,21 +96,24 @@ gulp.task('inject', function() {
             }))
             .pipe($.template(templateopts))
             .pipe($.minifyHtml(htmlopts))
-            .pipe(gulp.dest(config.paths.dist))
+            .pipe(gulp.dest(config.paths.dist));
 
     } else {
 
         gulp.src(config.paths.app + '/index.*')
-        // .pipe($.changed(config.paths.dist))
-        .pipe($.multinject(['libs.js'], 'jslibs', {
-            urlPrefix: ''
-        }))
+            .pipe($.changed(config.paths.dist))
+            .pipe($.multinject(['libs.js'], 'jslibs', {
+                urlPrefix: ''
+            }))
             .pipe($.multinject(['app.js'], 'jsapp', {
                 urlPrefix: ''
             }))
             .pipe($.template(templateopts))
             .pipe(gulp.dest(config.paths.dist))
-            .pipe(reload({ stream: true }));
+            .pipe(reload({
+                stream: true
+            }));
+
     }
 
 });
@@ -166,19 +169,19 @@ gulp.task('styles', function() {
             showFiles: true
         }))
         .pipe($.concat('style.css'))
-        .pipe($.
-            if (live, $.uncss({
-                html: glob.sync(config.paths.app + '/**/*.html'),
-                ignore: [
-                    /:hover/,
-                    /:active/,
-                    /.active/,
-                    /:visited/,
-                    /:focus/,
-                    /:checked/,
-                    /.open/
-                ]
-            })))
+        // .pipe($.
+        //     if (live, $.uncss({
+        //         html: glob.sync(config.paths.app + '/**/*.html'),
+        //         ignore: [
+        //             /:hover/,
+        //             /:active/,
+        //             /.active/,
+        //             /:visited/,
+        //             /:focus/,
+        //             /:checked/,
+        //             /.open/
+        //         ]
+        //     })))
         .pipe($.
             if (live, $.size({
                 title: 'Uncssed: '
@@ -188,10 +191,10 @@ gulp.task('styles', function() {
             if (live, $.size({
                 title: 'Autoprefixed: '
             })))
-        .pipe($.
-            if (live, $.csso({
-                keepSpecialComments: 0
-            })))
+        // .pipe($.
+        //     if (live, $.csso({
+        //         keepSpecialComments: 0
+        //     })))
         .pipe($.
             if (live, $.size({
                 title: 'Compressed: ',

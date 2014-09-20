@@ -9,7 +9,6 @@ var paths = {
 var files = {
     jslibs: [
         paths.bower + '/jquery/dist/jquery.js',
-        paths.bower + '/d3/d3.js',
         paths.bower + '/bootstrap/dist/js/bootstrap.js',
         paths.bower + '/spinjs/spin.js'
     ],
