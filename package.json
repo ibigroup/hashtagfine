@@ -24,7 +24,7 @@
     "run-sequence": "^0.3.6",
     "streamqueue": "^0.1.1"
   },
-  "name": "hackathon-app",
+  "name": "hashtagfine",
   "author": "@mjeightyfive",
   "version": "0.0.1",
   "private": true,
