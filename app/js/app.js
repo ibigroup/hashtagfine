@@ -71,11 +71,30 @@ var googleMap = (function() {
 
         var createHeatMap = function(moodsData, map) {
 
+            var gradient = [
+                'rgba(0, 255, 255, 0)',
+                'rgba(0, 255, 255, 1)',
+                'rgba(0, 191, 255, 1)',
+                'rgba(0, 127, 255, 1)',
+                'rgba(0, 63, 255, 1)',
+                'rgba(0, 0, 255, 1)',
+                'rgba(0, 0, 223, 1)',
+                'rgba(0, 0, 191, 1)',
+                'rgba(0, 0, 159, 1)',
+                'rgba(0, 0, 127, 1)',
+                'rgba(63, 0, 91, 1)',
+                'rgba(127, 0, 63, 1)',
+                'rgba(191, 0, 31, 1)',
+                'rgba(255, 0, 0, 1)'
+            ]
+
             var pointArray = new google.maps.MVCArray(moodsData);
 
             heatmap = new google.maps.visualization.HeatmapLayer({
                 data: pointArray
             });
+
+            heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
 
             heatmap.setMap(map);
         };
@@ -164,13 +183,14 @@ var googleMap = (function() {
 
         $('#data').html(append);
 
-        // console.log(data);
-
+        console.log(data);
         var points = [];
 
         for (var i = data.points.length - 1; i >= 0; i--) {
-            console.log(data.points[i].loc);
-            points.push(new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]));
+            points.push({
+                location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
+                weight: data.points[i].mood + 3
+            });
         };
 
         googleMap.heatmap(points, map);
