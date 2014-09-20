@@ -64,7 +64,21 @@ var googleMap = (function() {
         var map,
             service,
             infoWindow = new google.maps.InfoWindow(),
-            defaultLocation = new google.maps.LatLng(52.486243, -1.890401);
+            defaultLocation = new google.maps.LatLng(52.486243, -1.890401),
+            pointarray,
+            heatmap,
+            moodsData = [];
+
+        var createHeatMap = function(moodsData, map) {
+
+            var pointArray = new google.maps.MVCArray(moodsData);
+
+            heatmap = new google.maps.visualization.HeatmapLayer({
+                data: pointArray
+            });
+
+            heatmap.setMap(map);
+        };
 
         var createGoogleMap = function(containerId) {
 
@@ -75,6 +89,7 @@ var googleMap = (function() {
             };
 
             map = buildMap(containerId, options);
+
             var styles = [{
                 stylers: [{
                     hue: "#00ffe6"
@@ -100,9 +115,9 @@ var googleMap = (function() {
             map.setOptions({
                 styles: styles
             });
+
+            return map;
         };
-
-
 
         // var createMarker = function(place) {
         //     var marker = new google.maps.Marker({
@@ -127,28 +142,38 @@ var googleMap = (function() {
         };
         return {
             create: createGoogleMap,
-            move: move
+            move: move,
+            heatmap: createHeatMap,
         };
     }
 }());
 
 (function() {
 
-    googleMap.create('map-canvas');
+    var map = googleMap.create('map-canvas');
     spinnerModule.showSpinner('spinner');
 
     // var url = 'http://api.openweathermap.org/data/2.1/find/station?lat=55&lon=37&cnt=10';
-
-    var url = 'http://sentimentanalyser.azurewebsites.net/q/everything';
+    // var url = 'http://sentimentanalyser.azurewebsites.net/q/everything';
+    var url = 'http://sentimentanalyser.azurewebsites.net/test';
 
     dataModule.getData(url, function(data) {
-        // console.log(data);
         spinnerModule.hideSpinner();
 
-        var append = '<span>General score : ' + data.score + ' </span>';
+        var append = '<span>General mood : ' + data.mood + ' </span>';
 
         $('#data').html(append);
 
+        // console.log(data);
+
+        var points = [];
+
+        for (var i = data.points.length - 1; i >= 0; i--) {
+            console.log(data.points[i].loc);
+            points.push(new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]));
+        };
+
+        googleMap.heatmap(points, map);
     });
 
 })();
