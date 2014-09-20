@@ -17,8 +17,8 @@ var spinnerModule = (function() {
         hwaccel: false, // Whether to use hardware acceleration
         className: 'spinner', // The CSS class to assign to the spinner
         zIndex: 2e9, // The z-index (defaults to 2000000000)
-        top: 'auto', // Top position relative to parent in px
-        left: 'auto' // Left position relative to parent in px
+        top: '', // Top position relative to parent in px
+        left: '' // Left position relative to parent in px
     };
 
     var spinner = new Spinner(opts);
@@ -43,7 +43,7 @@ var dataModule = (function() {
     function getData(url, callback) {
 
         $.ajax({
-            dataType: 'jsonp',
+            // dataType: 'jsonp',
             url: url,
             success: function(data) {
                 callback(data);
@@ -64,7 +64,7 @@ var googleMap = (function() {
         var map,
             service,
             infoWindow = new google.maps.InfoWindow(),
-            defaultLocation = new google.maps.LatLng(52.486243,-1.890401);
+            defaultLocation = new google.maps.LatLng(52.486243, -1.890401);
 
         var createGoogleMap = function(containerId) {
 
@@ -75,7 +75,34 @@ var googleMap = (function() {
             };
 
             map = buildMap(containerId, options);
+            var styles = [{
+                stylers: [{
+                    hue: "#00ffe6"
+                }, {
+                    saturation: -20
+                }]
+            }, {
+                featureType: "road",
+                elementType: "geometry",
+                stylers: [{
+                    lightness: 100
+                }, {
+                    visibility: "simplified"
+                }]
+            }, {
+                featureType: "road",
+                elementType: "labels",
+                stylers: [{
+                    visibility: "off"
+                }]
+            }];
+
+            map.setOptions({
+                styles: styles
+            });
         };
+
+
 
         // var createMarker = function(place) {
         //     var marker = new google.maps.Marker({
@@ -108,19 +135,20 @@ var googleMap = (function() {
 (function() {
 
     googleMap.create('map-canvas');
-
-    // spinnerModule.showSpinner('data');
+    spinnerModule.showSpinner('spinner');
 
     // var url = 'http://api.openweathermap.org/data/2.1/find/station?lat=55&lon=37&cnt=10';
 
-    // dataModule.getData(url, function(data) {
-    //     spinnerModule.hideSpinner();
-    //     console.log(data);
+    var url = 'http://sentimentanalyser.azurewebsites.net/q/everything';
 
-    //     var append = '<span>Data retrieved: ' + data.cod + ' </span>';
+    dataModule.getData(url, function(data) {
+        // console.log(data);
+        spinnerModule.hideSpinner();
 
-    //     $('#data').html(append);
+        var append = '<span>General score : ' + data.score + ' </span>';
 
-    // });
+        $('#data').html(append);
+
+    });
 
 })();
