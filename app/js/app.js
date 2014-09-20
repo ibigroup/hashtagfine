@@ -57,6 +57,29 @@ var dataModule = (function() {
 
 })();
 
+var geocoder = (function(){
+    
+    var geocode = function(location, callback) {
+            var requestUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" + location + "&sensor=false";
+            var request = $.ajax({
+                dataType: "json",
+                url: requestUrl
+            });
+
+            request.done(function(data) {
+                if (data.results && data.results.length > 0) {
+                    var location = data.results[0].geometry.location;
+                    callback(location);
+                }
+            });
+    };
+
+    return {
+        geocode: geocode
+    };
+
+}());
+
 var googleMap = (function() {
 
     if (typeof(google) !== 'undefined') {
@@ -222,6 +245,19 @@ var googleMap = (function() {
     // var url = 'http://api.openweathermap.org/data/2.1/find/station?lat=55&lon=37&cnt=10';
     // var url = 'http://sentimentanalyser.azurewebsites.net/q/everything';
     var url = 'http://sentimentanalyser.azurewebsites.net/test';
+
+    var mainForm = $("#searchform");
+    mainForm.submit(function(e) {
+       e.preventDefault();
+       var location = $("#location", mainForm).val();
+       console.log("geocoding " + location);
+
+       if (location) {
+            geocoder.geocode(location, function(position) {
+                console.log(position);
+            });  
+       }
+    });
 
     dataModule.getData(url, function(data) {
         spinnerModule.hideSpinner();
