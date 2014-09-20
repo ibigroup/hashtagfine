@@ -66,7 +66,8 @@ var googleMap = (function() {
             infoWindow = new google.maps.InfoWindow(),
             defaultLocation = new google.maps.LatLng(52.486243, -1.890401),
             pointarray,
-            heatmap,
+            heatmapNegative,
+            heatmapPositive,
             moodsData = [];
 
         var getCircle = function(mood, circle) {
@@ -105,42 +106,42 @@ var googleMap = (function() {
             return circle;
         }
 
-        var createHeatMap = function(moodsData, map) {
-
-            // var gradient = [
-            //     'rgba(0, 255, 255, 0)',
-            //     'rgba(0, 255, 255, 1)',
-            //     'rgba(0, 191, 255, 1)',
-            //     'rgba(0, 127, 255, 1)',
-            //     'rgba(0, 63, 255, 1)',
-            //     'rgba(0, 0, 255, 1)',
-            //     'rgba(0, 0, 223, 1)',
-            //     'rgba(0, 0, 191, 1)',
-            //     'rgba(0, 0, 159, 1)',
-            //     'rgba(0, 0, 127, 1)',
-            //     'rgba(63, 0, 91, 1)',
-            //     'rgba(127, 0, 63, 1)',
-            //     'rgba(191, 0, 31, 1)',
-            //     'rgba(255, 0, 0, 1)'
-            // ]
+        var createNegativeHeatMap = function(moodsData, map) {
 
             var gradient = [
                 'rgba(0, 255, 255, 0)',
-                '#ff0000',
+                '#ff0000'
+            ];
+
+            var pointArray = new google.maps.MVCArray(moodsData);
+
+            heatmapNegative = new google.maps.visualization.HeatmapLayer({
+                data: pointArray,
+                radius: 20,
+                // opacity: 1
+            });
+
+            heatmapNegative.set('gradient', heatmapNegative.get('gradient') ? null : gradient);
+            heatmapNegative.setMap(map);
+        };
+
+        var createPositiveHeatMap = function(moodsData, map) {
+
+            var gradient = [
+                'rgba(0, 255, 255, 0)',
                 '#00ff00'
             ];
 
             var pointArray = new google.maps.MVCArray(moodsData);
 
-            heatmap = new google.maps.visualization.HeatmapLayer({
+            heatmapPositive = new google.maps.visualization.HeatmapLayer({
                 data: pointArray,
-                radius: 15
-                // maxIntensity: 6
+                radius: 15,
+                // opacity: 1
             });
 
-            heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
-
-            heatmap.setMap(map);
+            heatmapPositive.set('gradient', heatmapPositive.get('gradient') ? null : gradient);
+            heatmapPositive.setMap(map);
         };
 
         var createGoogleMap = function(containerId) {
@@ -206,7 +207,8 @@ var googleMap = (function() {
         return {
             create: createGoogleMap,
             move: move,
-            heatmap: createHeatMap,
+            createNegativeHeatMap: createNegativeHeatMap,
+            createPositiveHeatMap: createPositiveHeatMap,
             getCircle: getCircle
         };
     }
@@ -229,16 +231,26 @@ var googleMap = (function() {
         $('#data').html(append);
 
         console.log(data);
-        var points = [];
+        var positive = [],
+            negative = [];
 
         for (var i = data.points.length - 1; i >= 0; i--) {
-            points.push({
-                location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
-                weight: data.points[i].mood + 3
-            });
+
+            if (data.points[i].mood > 0) {
+                positive.push({
+                    location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
+                    weight: data.points[i].mood + 100
+                });
+            } else {
+                negative.push({
+                    location: new google.maps.LatLng(data.points[i].loc[0], data.points[i].loc[1]),
+                    weight: data.points[i].mood + 1000
+                });
+            };
         };
 
-        googleMap.heatmap(points, map);
+        googleMap.createPositiveHeatMap(positive, map);
+        googleMap.createNegativeHeatMap(negative, map);
 
 
 
