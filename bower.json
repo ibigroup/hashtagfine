@@ -7,8 +7,7 @@
     "modernizr": "*",
     "jquery": "*",
     "spinjs": "*",
-    "font-awesome": "*",
-    "d3": "~3.4.11"
+    "font-awesome": "*"
   },
   "devDependencies": {}
 }
