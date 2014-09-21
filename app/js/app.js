@@ -90,7 +90,7 @@ var googleMap = (function() {
             defaultLocation = new google.maps.LatLng(52.486243, -1.890401),
             pointarray,
             spotRadius = 50,
-            opacity = 0.8,
+            opacity = 0.5,
             IsDissipating = true,
             heatmapNegative,
             heatmapPositive,
@@ -114,6 +114,17 @@ var googleMap = (function() {
 
             heatmapNegative.set('gradient', heatmapNegative.get('gradient') ? null : gradient);
             heatmapNegative.setMap(map);
+
+            var addPoint = function(item) {
+                console.log(item);
+                pointArray.push(item);
+            };
+
+            return {
+                addPoint: addPoint
+            };
+
+
         };
 
         var createPositiveHeatMap = function(moodsData, map) {
@@ -134,12 +145,28 @@ var googleMap = (function() {
 
             heatmapPositive.set('gradient', heatmapPositive.get('gradient') ? null : gradient);
             heatmapPositive.setMap(map);
+
+            var addPoint = function(item) {
+                console.log(item);
+                pointArray.push(item);
+            };
+
+            return {
+                addPoint: addPoint
+            };
         };
+
+        // var updatePositive = function(newTweet) {
+        //     console.log(newTweet);
+        //     console.log('heatmapPositive.data', heatmapPositive.data);
+        //     heatmapPositive.setData(newTweet);
+        // }
+
 
         var createGoogleMap = function(containerId) {
 
             var options = {
-                zoom: 13,
+                zoom: 5,
                 center: defaultLocation,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
@@ -262,19 +289,6 @@ var googleMap = (function() {
             return map;
         };
 
-        // var createMarker = function(place) {
-        //     var marker = new google.maps.Marker({
-        //         map: map,
-        //         position: new google.maps.LatLng(place.Latitude, place.Longitude),
-        //         icon: 'data:image/png;base64,..'
-        //     });
-
-        //     google.maps.event.addListener(marker, 'click', function() {
-        //         infoWindow.setContent(place.Name);
-        //         infoWindow.open(map, this);
-        //     });
-        // };
-
         var move = function(latitude, longitude) {
             var pos = new google.maps.LatLng(latitude, longitude);
             map.setCenter(pos);
@@ -283,6 +297,7 @@ var googleMap = (function() {
         var buildMap = function(containerId, options) {
             return new google.maps.Map(document.getElementById(containerId), options);
         };
+
         return {
             create: createGoogleMap,
             move: move,
@@ -294,6 +309,9 @@ var googleMap = (function() {
 
 (function() {
 
+    var positive = [],
+        negative = [];
+
     var map = googleMap.create('map-canvas');
     spinnerModule.showSpinner('spinner');
 
@@ -302,9 +320,11 @@ var googleMap = (function() {
     var mainForm = $("#searchform");
     mainForm.submit(function(e) {
         e.preventDefault();
-        var location = $("#location", mainForm).val();
+        var location = $("#location", mainForm).val() + ', UK';
         var subject = $("#subject", mainForm).val();
         console.log("geocoding " + location);
+
+        doingSearch = true;
 
         if (location) {
             geocoder.geocode(location, function(position) {
@@ -314,25 +334,50 @@ var googleMap = (function() {
         }
     });
 
+    var initLiveData = function() {
+
+        var ph = googleMap.createPositiveHeatMap(positive, map);
+        var nh = googleMap.createNegativeHeatMap(negative, map);
+
+        var socket = io('http://sentimentanalyser.azurewebsites.net:80');
+        socket.on('livetweet', function(tweet) {
+            if (!doingSearch) {
+                var myLatlng = new google.maps.LatLng(tweet.loc[0], tweet.loc[1]);
+                // console.log('tweet', tweet);
+
+                if (tweet.mood.score > 0) {
+
+                    ph.addPoint({
+                        location: myLatlng,
+                        weight: Math.abs(tweet.mood.score)
+                    })
+
+                } else {
+                    nh.addPoint({
+                        location: myLatlng,
+                        weight: Math.abs(tweet.mood.score)
+                    })
+                };
+            }
+        });
+    }
+
+    var doingSearch = false;
+    initLiveData();
+
     var search = function(searchTerm, location) {
 
-        // var url = 'http://sentimentanalyser.azurewebsites.net/test';
         var url = 'http://sentimentanalyser.azurewebsites.net/search/' + searchTerm + '/' + location.lat + '/' + location.lng;
+
+        map.setCenter(new google.maps.LatLng(location.lat, location.lng));
+        map.setZoom(13);
 
         console.log(url);
 
         dataModule.getData(url, function(data) {
 
             console.log(data);
-
             spinnerModule.hideSpinner();
-
-            // var append = '<span>General mood for: ' + data.name + ' is ' + data.mood + '</span>';
-
-            // $('#data').html(append);
-
-            var positive = [],
-                negative = [];
 
             for (var i = data.points.length - 1; i >= 0; i--) {
 
